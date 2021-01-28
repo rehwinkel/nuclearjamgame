@@ -1,0 +1,12 @@
+[submodule "vendor/glfw"]
+	path = vendor/glfw
+	url = https://github.com/glfw/glfw.git
+[submodule "vendor/libsoundio"]
+	path = vendor/libsoundio
+	url = https://github.com/andrewrk/libsoundio.git
+[submodule "vendor/stb"]
+	path = vendor/stb
+	url = https://github.com/nothings/stb.git
+[submodule "vendor/zlib"]
+	path = vendor/zlib
+	url = https://github.com/madler/zlib.git
