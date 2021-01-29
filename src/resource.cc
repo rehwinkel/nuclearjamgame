@@ -18,7 +18,7 @@ uint32_t ResourceBuilder::add_texture(const char* path) {
     int32_t x, y, components;
     uint8_t* image_data = stbi_load_from_file(in_file, &x, &y, &components, 4);
     RawTexture result{
-        std::vector((char*)image_data, (char*)image_data + x * y * 4),
+        std::vector<char>((char*)image_data, (char*)image_data + x * y * 4),
         (uint32_t)x, (uint32_t)y};
     stbi_image_free(image_data);
     this->textures.emplace_back(std::move(result));
@@ -182,3 +182,15 @@ Resource::Resource(std::vector<AtlasTexture> textures, uint32_t width,
       atlas_width(width),
       atlas_data(data),
       other(other) {}
+
+Atlas Resource::get_atlas() {
+    return Atlas{this->atlas_width, this->atlas_height, this->atlas_data};
+}
+
+const AtlasTexture& Resource::get_texture(uint32_t index) {
+    return this->textures.at(index);
+}
+
+const std::vector<char>& Resource::get_other(uint32_t index) {
+    return this->other.at(index);
+}

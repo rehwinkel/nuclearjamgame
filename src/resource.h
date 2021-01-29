@@ -8,6 +8,11 @@ struct AtlasTexture {
     uint16_t x, y, width, height;
 };
 
+struct Atlas {
+    uint32_t width, height;
+    std::vector<char>& data;
+};
+
 class Resource {
     uint32_t atlas_width;
     uint32_t atlas_height;
@@ -26,6 +31,9 @@ class Resource {
     static Resource from_buffer(const char* data, uint32_t size);
     void to_file(const char* path);
     std::vector<char> to_buffer();
+    Atlas get_atlas();
+    const AtlasTexture& get_texture(uint32_t index);
+    const std::vector<char>& get_other(uint32_t index);
     friend class ResourceBuilder;
 };
 

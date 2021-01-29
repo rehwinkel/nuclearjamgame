@@ -16,7 +16,8 @@ int main(int argc, char const* argv[]) {
     for (size_t i = 2; i < argc; i++) {
         std::string path(argv[i]);
         uint32_t id;
-        if (path.ends_with(".png") || path.ends_with(".jpg")) {
+        std::string ending(path.c_str() + path.size() - 4);
+        if (ending == ".png" || ending == ".jpg") {
             id = builder.add_texture(path.c_str());
         } else {
             id = builder.add_other(path.c_str());
