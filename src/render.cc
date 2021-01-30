@@ -28,8 +28,19 @@ out vec4 color;
 
 uniform sampler2D albedo;
 
+uniform vec4 uv_mapping;
+
+float map(float value, float min1, float max1, float min2, float max2) {
+    float perc = (value - min1) / (max1 - min1);
+    return perc * (max2 - min2) + min2;
+}
+
 void main(void) {
-    color = texture2D(albedo, vec2(uv.x, 1-uv.y));
+    float u = map(uv.x, 0, 1, uv_mapping.x, uv_mapping.z);
+    float v = map(uv.y, 1, 0, uv_mapping.y, uv_mapping.w);
+    vec2 final_uv = vec2(u, v);
+    final_uv = vec2(final_uv.x, final_uv.y);
+    color = texture2D(albedo, final_uv);
 }
 
 )"""";
@@ -103,14 +114,22 @@ Renderer::Renderer(Window window, uint16_t width, uint16_t height,
     glAttachShader(program, frag_shader);
     glLinkProgram(program);
     glUseProgram(program);
-}
-
-void Renderer::refresh() {
-    glClear(GL_COLOR_BUFFER_BIT);
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, this->atlas_texture);
+    this->uniforms[Uniform::UV] = glGetUniformLocation(program, "uv_mapping");
+}
+
+void Renderer::pre_render() { glClear(GL_COLOR_BUFFER_BIT); }
+
+void Renderer::post_render() { this->m_window.refresh(); }
+
+void Renderer::draw_sprite(AtlasTexture tex) {
+    uint32_t uv_mapping = this->uniforms[Uniform::UV];
+    glUniform4f(uv_mapping, (float)tex.x / (float)this->m_atlas_width,
+                (float)tex.y / (float)this->m_atlas_height,
+                (float)(tex.x + tex.width) / (float)this->m_atlas_width,
+                (float)(tex.y + tex.height) / (float)this->m_atlas_height);
     glDrawArrays(GL_TRIANGLES, 0, 6);
-    this->m_window.refresh();
 }
 
 bool Renderer::keep_open() { return this->m_window.keep_open(); }

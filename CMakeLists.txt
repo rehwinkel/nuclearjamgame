@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.0)
 
 project(game2d)
 
-include_directories(vendor/glad/include vendor/glfw/include vendor/libsoundio/soundio vendor/stb vendor/zlib)
+include_directories(vendor/glad/include vendor/glfw/include vendor/libsoundio/soundio vendor/stb vendor/zlib vendor/glm/glm)
 
 add_subdirectory(vendor/glfw)
 set(BUILD_DYNAMIC_LIBS OFF CACHE BOOL "build sound shared")
@@ -10,9 +10,10 @@ set(BUILD_EXAMPLE_PROGRAMS OFF CACHE BOOL "build sound example")
 set(BUILD_TESTS OFF CACHE BOOL "build sound tests")
 add_subdirectory(vendor/libsoundio)
 add_subdirectory(vendor/zlib)
+add_subdirectory(vendor/glm)
 
 add_library(game2d vendor/glad/src/glad.c src/core.cc src/render.cc src/window.cc src/util.cc src/resource.cc src/resource_dec.cc)
-target_link_libraries(game2d glfw libsoundio_static zlibstatic)
+target_link_libraries(game2d glfw libsoundio_static zlibstatic glm_static)
 
 add_executable(packer src/packer.cc src/resource.cc src/resource_enc.cc src/util.cc)
 target_link_libraries(packer zlibstatic)
