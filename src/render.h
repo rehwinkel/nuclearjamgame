@@ -6,6 +6,7 @@
 enum Uniform {
     UV,
     PROJ_MAT,
+    MODEL_MAT,
     MAX_ELEMENT,
 };
 
@@ -17,7 +18,8 @@ class Renderer {
 
    public:
     Renderer(Window window, uint16_t width, uint16_t height, const char* data);
-    void draw_sprite(AtlasTexture texture);
+    void draw_sprite(AtlasTexture tex, float x, float y, uint32_t z_level,
+                     float rotation, float ppu_x, float ppu_y);
     void pre_render();
     void post_render();
     bool keep_open();
