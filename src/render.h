@@ -27,4 +27,5 @@ class Renderer {
     float &camera_x();
     float &camera_y();
     float &camera_scale();
+    Window &get_window();
 };

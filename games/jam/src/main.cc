@@ -11,8 +11,9 @@ class SpriteComponent : public Component {
     AtlasTexture texture;
 
    public:
-    SpriteComponent(std::weak_ptr<Entity> entity, AtlasTexture texture)
-        : Component(entity), texture(texture) {}
+    SpriteComponent(Game& game, std::weak_ptr<Entity> entity,
+                    AtlasTexture texture)
+        : Component(game, entity), texture(texture) {}
     virtual ~SpriteComponent() {}
     virtual void update(double delta) {}
     virtual void render(Renderer& renderer) {
@@ -25,6 +26,8 @@ class SpriteComponent : public Component {
                              1, this_entity->rotation,
                              this_entity->size_x * PIXELS_PER_UNIT,
                              this_entity->size_y * PIXELS_PER_UNIT);
+        if (this->game.is_key_down(GLFW_KEY_SPACE))
+            std::cout << "SPaes" << std::endl;
     }
 };
 

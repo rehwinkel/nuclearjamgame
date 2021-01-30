@@ -1,10 +1,10 @@
-#include "render.h"
-
 #include <glad/glad.h>
 #include <string>
 #include <mat4x4.hpp>
 #include <gtc/type_ptr.hpp>
 #include <gtc/matrix_transform.hpp>
+
+#include "render.h"
 
 const char* vert_source = R""""(
 
@@ -178,3 +178,5 @@ void Renderer::draw_sprite(AtlasTexture tex, float x, float y, uint32_t z_level,
 }
 
 bool Renderer::keep_open() { return this->m_window.keep_open(); }
+
+Window& Renderer::get_window() { return this->m_window; }

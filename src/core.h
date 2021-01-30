@@ -6,13 +6,15 @@
 #include <memory>
 
 class Entity;
+class Game;
 
 class Component {
    protected:
+    Game& game;
     std::weak_ptr<Entity> entity;
 
    public:
-    Component(std::weak_ptr<Entity> entity);
+    Component(Game& game, std::weak_ptr<Entity> entity);
     virtual ~Component();
     virtual void update(double delta) = 0;
     virtual void render(Renderer& renderer) = 0;
@@ -25,6 +27,8 @@ class Game {
     std::vector<std::weak_ptr<Entity>> entities;
 
    public:
+    bool _key_states[GLFW_KEY_LAST];
+
     Game(Renderer renderer);
     template <class T, class... Args>
     std::shared_ptr<T> add_entity(Args... v) {
@@ -34,6 +38,7 @@ class Game {
     }
     std::vector<std::weak_ptr<Entity>>& get_entities();
     Renderer& renderer();
+    bool is_key_down(int key);
     void run();
 };
 
@@ -55,7 +60,7 @@ class Entity : public std::enable_shared_from_this<Entity> {
     template <class T, class... Args>
     void add_component(Args... v) {
         std::unique_ptr<T> comp = std::make_unique<T>(
-            std::weak_ptr<Entity>(shared_from_this()), v...);
+            this->game, std::weak_ptr<Entity>(shared_from_this()), v...);
         this->components.emplace_back(std::move(comp));
     }
     template <class T, class... Args>

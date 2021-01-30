@@ -1,7 +1,7 @@
-#include "window.h"
-
 #include <glad/glad.h>
-#include <GLFW/glfw3.h>
+
+#include "core.h"
+#include "window.h"
 
 Window::Window(uint16_t width, uint16_t height, const char* title)
     : m_width(width), m_height(height) {
@@ -11,19 +11,34 @@ Window::Window(uint16_t width, uint16_t height, const char* title)
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
     glfwWindowHint(GLFW_SAMPLES, 4);
     this->m_window = glfwCreateWindow(width, height, title, nullptr, nullptr);
-    glfwMakeContextCurrent((GLFWwindow*)this->m_window);
+    glfwMakeContextCurrent(this->m_window);
     glfwSwapInterval(1);
     gladLoadGLLoader(
         [](const char* func) { return (void*)glfwGetProcAddress(func); });
 }
 
-bool Window::keep_open() {
-    return !glfwWindowShouldClose((GLFWwindow*)this->m_window);
+void Window::setup_callbacks(Game& game) {
+    glfwSetWindowUserPointer(this->m_window, &game);
+    glfwSetKeyCallback(this->m_window, [](GLFWwindow* window, int key,
+                                          int scancode, int action, int mods) {
+        Game& game = *(Game*)glfwGetWindowUserPointer(window);
+        switch (action) {
+            case GLFW_PRESS:
+            case GLFW_REPEAT:
+                game._key_states[key] = true;
+                break;
+            default:
+                game._key_states[key] = false;
+                break;
+        }
+    });
 }
+
+bool Window::keep_open() { return !glfwWindowShouldClose(this->m_window); }
 
 void Window::refresh() {
     glfwPollEvents();
-    glfwSwapBuffers((GLFWwindow*)this->m_window);
+    glfwSwapBuffers(this->m_window);
 }
 
 float Window::width() { return (float)this->m_width; }

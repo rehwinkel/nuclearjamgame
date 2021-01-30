@@ -1,6 +1,7 @@
 #include "core.h"
 
-Component::Component(std::weak_ptr<Entity> entity) : entity(entity) {}
+Component::Component(Game& game, std::weak_ptr<Entity> entity)
+    : game(game), entity(entity) {}
 
 Component::~Component() {}
 
@@ -33,7 +34,9 @@ void Entity::render(Renderer& renderer) {
     }
 }
 
-Game::Game(Renderer renderer) : m_renderer(renderer) {}
+Game::Game(Renderer renderer) : m_renderer(renderer), _key_states{0} {
+    this->m_renderer.get_window().setup_callbacks(*this);
+}
 
 void Game::run() {
     while (this->m_renderer.keep_open()) {
@@ -57,6 +60,11 @@ void Game::run() {
 
 std::vector<std::weak_ptr<Entity>>& Game::get_entities() {
     return this->entities;
+}
+
+bool Game::is_key_down(int key) {
+    if (key >= GLFW_KEY_LAST || key < 0) panic("invalid keycode");
+    return this->_key_states[key];
 }
 
 Renderer& Game::renderer() { return this->m_renderer; }
