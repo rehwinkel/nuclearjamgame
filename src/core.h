@@ -28,6 +28,8 @@ class Game {
 
    public:
     bool _key_states[GLFW_KEY_LAST];
+    bool _mb_states[GLFW_MOUSE_BUTTON_LAST];
+    double _mouse_x, _mouse_y, _scroll_x, _scroll_y;
 
     Game(Renderer renderer);
     template <class T, class... Args>
@@ -39,6 +41,11 @@ class Game {
     std::vector<std::weak_ptr<Entity>>& get_entities();
     Renderer& renderer();
     bool is_key_down(int key);
+    bool is_button_down(int button);
+    float get_mouse_x();
+    float get_mouse_y();
+    float get_scroll_x();
+    float get_scroll_y();
     void run();
 };
 

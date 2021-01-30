@@ -34,13 +34,21 @@ void Entity::render(Renderer& renderer) {
     }
 }
 
-Game::Game(Renderer renderer) : m_renderer(renderer), _key_states{0} {
+Game::Game(Renderer renderer)
+    : m_renderer(renderer),
+      _key_states{0},
+      _mb_states{0},
+      _mouse_x(0),
+      _mouse_y(0),
+      _scroll_x(0),
+      _scroll_y(0) {
     this->m_renderer.get_window().setup_callbacks(*this);
 }
 
 void Game::run() {
+    double last_time = glfwGetTime();
     while (this->m_renderer.keep_open()) {
-        double delta = 0;
+        double delta = glfwGetTime() - last_time;
         for (std::weak_ptr<Entity>& entity_weak : this->entities) {
             if (!entity_weak.expired()) {
                 std::shared_ptr<Entity> entity = entity_weak.lock();
@@ -54,6 +62,7 @@ void Game::run() {
                 entity->render(this->m_renderer);
             }
         }
+        last_time = glfwGetTime();
         this->m_renderer.post_render();
     }
 }
@@ -66,5 +75,17 @@ bool Game::is_key_down(int key) {
     if (key >= GLFW_KEY_LAST || key < 0) panic("invalid keycode");
     return this->_key_states[key];
 }
+
+bool Game::is_button_down(int button) {
+    if (button >= GLFW_KEY_LAST || button < 0) panic("invalid button");
+    return this->_mb_states[button];
+}
+float Game::get_mouse_x() { return this->_mouse_x; }
+
+float Game::get_mouse_y() { return this->_mouse_y; }
+
+float Game::get_scroll_x() { return this->_scroll_x; }
+
+float Game::get_scroll_y() { return this->_scroll_y; }
 
 Renderer& Game::renderer() { return this->m_renderer; }

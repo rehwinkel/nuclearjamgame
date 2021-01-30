@@ -32,6 +32,32 @@ void Window::setup_callbacks(Game& game) {
                 break;
         }
     });
+    glfwSetMouseButtonCallback(
+        this->m_window,
+        [](GLFWwindow* window, int button, int action, int mods) {
+            Game& game = *(Game*)glfwGetWindowUserPointer(window);
+            switch (action) {
+                case GLFW_PRESS:
+                case GLFW_REPEAT:
+                    game._mb_states[button] = true;
+                    break;
+                default:
+                    game._mb_states[button] = false;
+                    break;
+            }
+        });
+    glfwSetCursorPosCallback(
+        this->m_window, [](GLFWwindow* window, double x, double y) {
+            Game& game = *(Game*)glfwGetWindowUserPointer(window);
+            game._mouse_x = x;
+            game._mouse_y = y;
+        });
+    glfwSetScrollCallback(
+        this->m_window, [](GLFWwindow* window, double x, double y) {
+            Game& game = *(Game*)glfwGetWindowUserPointer(window);
+            game._scroll_x += x;
+            game._scroll_y += y;
+        });
 }
 
 bool Window::keep_open() { return !glfwWindowShouldClose(this->m_window); }
