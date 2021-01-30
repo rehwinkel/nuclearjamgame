@@ -4,7 +4,20 @@ Component::Component(std::weak_ptr<Entity> entity) : entity(entity) {}
 
 Component::~Component() {}
 
-Entity::Entity(Game& game) : game(game) {}
+Entity::Entity(Game& game, std::weak_ptr<Entity> parent, float x, float y,
+               float rotation, float size_x, float size_y)
+    : game(game),
+      parent{},
+      x(x),
+      y(y),
+      rotation(rotation),
+      size_x(size_x),
+      size_y(size_y) {}
+
+Entity::Entity(Game& game, std::weak_ptr<Entity> parent)
+    : Entity(game, parent, 0, 0, 0, 1, 1) {}
+
+Entity::Entity(Game& game) : Entity(game, std::weak_ptr<Entity>{}) {}
 
 Entity::~Entity() {}
 
@@ -41,3 +54,9 @@ void Game::run() {
         this->m_renderer.post_render();
     }
 }
+
+std::vector<std::weak_ptr<Entity>>& Game::get_entities() {
+    return this->entities;
+}
+
+Renderer& Game::renderer() { return this->m_renderer; }

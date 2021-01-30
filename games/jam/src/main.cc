@@ -5,6 +5,8 @@
 extern "C" const unsigned long long jam_size;
 extern "C" const char jam_data[];
 
+const static float PIXELS_PER_UNIT = 32;
+
 class SpriteComponent : public Component {
     AtlasTexture texture;
 
@@ -14,21 +16,30 @@ class SpriteComponent : public Component {
     virtual ~SpriteComponent() {}
     virtual void update(double delta) {}
     virtual void render(Renderer& renderer) {
-        renderer.draw_sprite(this->texture, 0, 0, 998, 0, 64, 64);
-        renderer.draw_sprite(this->texture, 1, 0, 999, 0, 256, 256);
-        renderer.draw_sprite(this->texture, -1, 0, 999, 0, 256, 256);
+        std::shared_ptr<Entity> this_entity = this->entity.lock();
+        renderer.draw_sprite(this->texture, this_entity->x, this_entity->y, 1,
+                             this_entity->rotation,
+                             this_entity->size_x * PIXELS_PER_UNIT,
+                             this_entity->size_y * PIXELS_PER_UNIT);
+        renderer.draw_sprite(this->texture, this_entity->x + 1, this_entity->y,
+                             1, this_entity->rotation,
+                             this_entity->size_x * PIXELS_PER_UNIT,
+                             this_entity->size_y * PIXELS_PER_UNIT);
     }
 };
 
 int main(int argc, char const* argv[]) {
     Resource res = Resource::from_buffer(jam_data, jam_size);
     Atlas atlas = res.get_atlas();
-    Game game(Renderer(Window(640, 480, "Window"), atlas.width, atlas.height,
+    Game game(Renderer(Window(1280, 720, "Window"), atlas.width, atlas.height,
                        atlas.data.data()));
-    AtlasTexture gimp_tex = res.get_texture(0);
+    AtlasTexture gimp_tex = res.get_texture(1);
 
     auto ptr = game.add_entity<Entity>();
     ptr->add_component<SpriteComponent>(gimp_tex);
+    ptr->add_child<Entity>();
+    game.renderer().camera_scale() = 8;
+    game.renderer().camera_x() = 0;
 
     game.run();
     return 0;

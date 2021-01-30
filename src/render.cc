@@ -46,7 +46,9 @@ void main(void) {
     float v = map(uv.y, 1, 0, uv_mapping.y, uv_mapping.w);
     vec2 final_uv = vec2(u, v);
     final_uv = vec2(final_uv.x, final_uv.y);
-    color = texture2D(albedo, final_uv);
+    vec4 texture_color = texture2D(albedo, final_uv);
+    if (texture_color.w == 0) discard;
+    color = texture_color;
 }
 
 )"""";
@@ -70,7 +72,12 @@ void check_shader(GLuint shader) {
 
 Renderer::Renderer(Window window, uint16_t width, uint16_t height,
                    const char* data)
-    : m_window(window), m_atlas_width(width), m_atlas_height(height) {
+    : m_window(window),
+      m_atlas_width(width),
+      m_atlas_height(height),
+      m_camera_x(0),
+      m_camera_y(0),
+      m_camera_scale(1) {
     GLuint atlas_tex;
     glGenTextures(1, &atlas_tex);
     glBindTexture(GL_TEXTURE_2D, atlas_tex);
@@ -133,6 +140,12 @@ Renderer::Renderer(Window window, uint16_t width, uint16_t height,
                        glm::value_ptr(orthographic));
 }
 
+float& Renderer::camera_x() { return this->m_camera_x; }
+
+float& Renderer::camera_y() { return this->m_camera_y; }
+
+float& Renderer::camera_scale() { return this->m_camera_scale; }
+
 void Renderer::pre_render() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
@@ -151,11 +164,14 @@ void Renderer::draw_sprite(AtlasTexture tex, float x, float y, uint32_t z_level,
                 (float)(tex.y + tex.height) / (float)this->m_atlas_height);
 
     glm::mat4 model_mat(1.0f);
-    model_mat = glm::translate(model_mat, glm::vec3(x, y, z_level - 1000.0f));
+    model_mat = glm::scale(model_mat, glm::vec3(2.0f / this->m_camera_scale));
+    model_mat = glm::translate(
+        model_mat, glm::vec3(x - this->m_camera_x, y - this->m_camera_y,
+                             z_level - 1000.0f));
     model_mat = glm::rotate(model_mat, glm::radians(-rotation),
                             glm::vec3(0.0f, 0.0f, 1.0f));
-    float x_scale = (float)tex.width / (float)ppu_x;
-    float y_scale = (float)tex.height / (float)ppu_y;
+    float x_scale = (float)tex.width / (float)ppu_x * 0.5f;
+    float y_scale = (float)tex.height / (float)ppu_y * 0.5f;
     model_mat = glm::scale(model_mat, glm::vec3(x_scale, y_scale, 1.0f));
     glUniformMatrix4fv(model, 1, false, glm::value_ptr(model_mat));
     glDrawArrays(GL_TRIANGLES, 0, 6);

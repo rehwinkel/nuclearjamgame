@@ -152,8 +152,10 @@ Resource ResourceBuilder::build() {
                          (uint16_t)tex.width, (uint16_t)tex.height});
     }
     std::vector<AtlasTexture> result;
-    for (const uint32_t& i : indices)
-        result.push_back(unsorted_result[indices[i]]);
+    for (const uint32_t& i : indices) {
+        AtlasTexture& res = unsorted_result[i];
+        result.push_back(res);
+    }
     std::vector<char> atlas_data;
     uint32_t atlas_width = root->w;
     uint32_t atlas_height = root->h;
