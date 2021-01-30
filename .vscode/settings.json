@@ -81,6 +81,7 @@
         "vendor/libsoundio/soundio",
         "src",
         "vendor/stb",
-        "vendor/zlib"
+        "vendor/zlib",
+        "vendor/glm/glm"
     ]
 }

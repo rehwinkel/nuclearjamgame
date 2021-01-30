@@ -3,7 +3,8 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
-Window::Window(uint16_t width, uint16_t height, const char* title) {
+Window::Window(uint16_t width, uint16_t height, const char* title)
+    : m_width(width), m_height(height) {
     if (glfwInit() != GLFW_TRUE) panic("failed to initialize glfw");
     glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -24,3 +25,7 @@ void Window::refresh() {
     glfwPollEvents();
     glfwSwapBuffers((GLFWwindow*)this->m_window);
 }
+
+float Window::width() { return (float)this->m_width; }
+
+float Window::height() { return (float)this->m_height; }

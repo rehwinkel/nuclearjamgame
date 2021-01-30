@@ -23,7 +23,7 @@ int main(int argc, char const* argv[]) {
     Atlas atlas = res.get_atlas();
     Game game(Renderer(Window(640, 480, "Window"), atlas.width, atlas.height,
                        atlas.data.data()));
-    AtlasTexture gimp_tex = res.get_texture(0);
+    AtlasTexture gimp_tex = res.get_texture(1);
 
     auto ptr = game.add_entity<Entity>();
     ptr->add_component<SpriteComponent>(gimp_tex);

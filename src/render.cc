@@ -2,6 +2,9 @@
 
 #include <glad/glad.h>
 #include <string>
+#include <mat4x4.hpp>
+#include <gtc/type_ptr.hpp>
+#include <gtc/matrix_transform.hpp>
 
 const char* vert_source = R""""(
 
@@ -11,8 +14,10 @@ in vec3 position;
 
 out vec2 uv;
 
+uniform mat4 projection;
+
 void main(void) {
-    gl_Position = vec4(position, 1.0);
+    gl_Position = projection * vec4(position, 1.0);
     uv = (position.xy + 1.0) / 2.0;
 }
 
@@ -117,6 +122,12 @@ Renderer::Renderer(Window window, uint16_t width, uint16_t height,
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, this->atlas_texture);
     this->uniforms[Uniform::UV] = glGetUniformLocation(program, "uv_mapping");
+    this->uniforms[Uniform::PROJ_MAT] =
+        glGetUniformLocation(program, "projection");
+    float ar = this->m_window.width() / this->m_window.height();
+    glm::mat4 orthographic = glm::ortho(-ar, +ar, -1.0f, 1.0f);
+    glUniformMatrix4fv(this->uniforms[Uniform::PROJ_MAT], 1, false,
+                       glm::value_ptr(orthographic));
 }
 
 void Renderer::pre_render() { glClear(GL_COLOR_BUFFER_BIT); }

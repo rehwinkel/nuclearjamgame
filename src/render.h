@@ -5,6 +5,7 @@
 
 enum Uniform {
     UV,
+    PROJ_MAT,
     MAX_ELEMENT,
 };
 
