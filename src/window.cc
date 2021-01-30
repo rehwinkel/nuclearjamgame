@@ -19,22 +19,26 @@ Window::Window(uint16_t width, uint16_t height, const char* title)
 
 void Window::setup_callbacks(Game& game) {
     glfwSetWindowUserPointer(this->m_window, &game);
-    glfwSetKeyCallback(this->m_window, [](GLFWwindow* window, int key,
-                                          int scancode, int action, int mods) {
-        Game& game = *(Game*)glfwGetWindowUserPointer(window);
-        switch (action) {
-            case GLFW_PRESS:
-            case GLFW_REPEAT:
-                game._key_states[key] = true;
-                break;
-            default:
-                game._key_states[key] = false;
-                break;
-        }
-    });
+    glfwSetKeyCallback(
+        this->m_window,
+        [](GLFWwindow* window, int key, int _scancode, int action, int _mods) {
+            (void)_scancode;
+            (void)_mods;
+            Game& game = *(Game*)glfwGetWindowUserPointer(window);
+            switch (action) {
+                case GLFW_PRESS:
+                case GLFW_REPEAT:
+                    game._key_states[key] = true;
+                    break;
+                default:
+                    game._key_states[key] = false;
+                    break;
+            }
+        });
     glfwSetMouseButtonCallback(
         this->m_window,
-        [](GLFWwindow* window, int button, int action, int mods) {
+        [](GLFWwindow* window, int button, int action, int _mods) {
+            (void)_mods;
             Game& game = *(Game*)glfwGetWindowUserPointer(window);
             switch (action) {
                 case GLFW_PRESS:

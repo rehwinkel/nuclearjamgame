@@ -6,10 +6,10 @@
 #include <zlib.h>
 
 std::vector<char> compress_data(const std::vector<char>& raw_data) {
-    size_t compressed_size = compressBound(raw_data.size());
+    uLong compressed_size = compressBound(raw_data.size());
     std::vector<char> compressed(compressed_size);
     if (compress2((uint8_t*)compressed.data(), &compressed_size,
-                  (uint8_t*)raw_data.data(), raw_data.size(),
+                  (uint8_t*)raw_data.data(), (uLong)raw_data.size(),
                   Z_BEST_COMPRESSION) != Z_OK) {
         panic("failed to compress data");
     }

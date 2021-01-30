@@ -42,10 +42,10 @@ class Game {
     Renderer& renderer();
     bool is_key_down(int key);
     bool is_button_down(int button);
-    float get_mouse_x();
-    float get_mouse_y();
-    float get_scroll_x();
-    float get_scroll_y();
+    double get_mouse_x();
+    double get_mouse_y();
+    double get_scroll_x();
+    double get_scroll_y();
     void run();
 };
 

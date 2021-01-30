@@ -13,7 +13,7 @@ int main(int argc, char const* argv[]) {
     std::string out_name(argv[1]);
 
     std::ofstream map_file(out_name + ".map");
-    for (size_t i = 2; i < argc; i++) {
+    for (int i = 2; i < argc; i++) {
         std::string path(argv[i]);
         uint32_t id;
         std::string ending(path.c_str() + path.size() - 4);

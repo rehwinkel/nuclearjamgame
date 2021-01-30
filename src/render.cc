@@ -59,10 +59,10 @@ void check_shader(GLuint shader) {
     glGetShaderiv(shader, GL_COMPILE_STATUS, &compile_result);
     glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &log_length);
     if (log_length > 0) {
-        char message[log_length + 1];
-        glGetShaderInfoLog(shader, log_length, nullptr, message);
+        std::vector<char> message(log_length + 1);
+        glGetShaderInfoLog(shader, log_length, nullptr, message.data());
         std::string msg("failed to compile shader: ");
-        msg += message;
+        msg += message.data();
         panic(msg.c_str());
     }
     if (!compile_result) {
@@ -169,7 +169,7 @@ void Renderer::draw_sprite(AtlasTexture tex, float x, float y, uint32_t z_level,
     model_mat = glm::scale(model_mat, glm::vec3(2.0f / this->m_camera_scale));
     model_mat = glm::translate(
         model_mat, glm::vec3(x - this->m_camera_x, y - this->m_camera_y,
-                             z_level - 1000.0f));
+                             (float)z_level - 1000.0f));
     model_mat = glm::rotate(model_mat, glm::radians(-rotation),
                             glm::vec3(0.0f, 0.0f, 1.0f));
     float x_scale = (float)tex.width / (float)ppu_x * 0.5f;

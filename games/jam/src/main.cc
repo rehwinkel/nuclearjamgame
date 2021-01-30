@@ -22,14 +22,14 @@ class SpriteComponent : public Component {
     }
     virtual void render(Renderer& renderer) {
         std::shared_ptr<Entity> this_entity = this->entity.lock();
-        renderer.draw_sprite(this->texture, this_entity->x, this_entity->y, level,
-                             this_entity->rotation,
+        renderer.draw_sprite(this->texture, this_entity->x, this_entity->y,
+                             level, this_entity->rotation,
                              this_entity->size_x * PIXELS_PER_UNIT,
                              this_entity->size_y * PIXELS_PER_UNIT);
     }
 };
 
-int main(int argc, char const* argv[]) {
+int main() {
     Resource res = Resource::from_buffer(jam_data, jam_size);
     Atlas atlas = res.get_atlas();
     Game game(Renderer(Window(1280, 720, "Window"), atlas.width, atlas.height,

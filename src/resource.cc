@@ -22,7 +22,7 @@ uint32_t ResourceBuilder::add_texture(const char* path) {
         (uint32_t)x, (uint32_t)y};
     stbi_image_free(image_data);
     this->textures.emplace_back(std::move(result));
-    return this->textures.size() - 1;
+    return (uint32_t)this->textures.size() - 1;
 }
 
 uint32_t ResourceBuilder::add_other(const char* path) {
@@ -33,12 +33,12 @@ uint32_t ResourceBuilder::add_other(const char* path) {
     std::vector<char> content((std::istreambuf_iterator<char>(file)),
                               std::istreambuf_iterator<char>());
     this->other.emplace_back(std::move(content));
-    return this->other.size() - 1;
+    return (uint32_t)this->other.size() - 1;
 }
 
 struct Node {
-    bool used;
     uint32_t x, y, w, h;
+    bool used;
     std::unique_ptr<Node> right, down;
 
     Node() : x(0), y(0), w(0), h(0), used(false) {}
@@ -179,10 +179,10 @@ Resource ResourceBuilder::build() {
 Resource::Resource(std::vector<AtlasTexture> textures, uint32_t width,
                    uint32_t height, std::vector<char> data,
                    std::vector<std::vector<char>> other)
-    : textures(textures),
+    : atlas_width(width),
       atlas_height(height),
-      atlas_width(width),
       atlas_data(data),
+      textures(textures),
       other(other) {}
 
 Atlas Resource::get_atlas() {

@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.10)
 
 project(game2d)
 
@@ -11,9 +11,15 @@ set(BUILD_TESTS OFF CACHE BOOL "build sound tests")
 add_subdirectory(vendor/libsoundio)
 add_subdirectory(vendor/zlib)
 add_subdirectory(vendor/glm)
+add_library(glad STATIC vendor/glad/src/glad.c)
 
-add_library(game2d vendor/glad/src/glad.c src/core.cc src/render.cc src/window.cc src/util.cc src/resource.cc src/resource_dec.cc)
-target_link_libraries(game2d glfw libsoundio_static zlibstatic glm_static)
+add_library(game2d src/core.cc src/render.cc src/window.cc src/util.cc src/resource.cc src/resource_dec.cc)
+target_link_libraries(game2d glad glfw libsoundio_static zlibstatic glm_static)
+if (MSVC)
+    target_compile_options(game2d PRIVATE /W4)
+else()
+    target_compile_options(game2d PRIVATE -Wall -Wextra -Wconversion -pedantic)
+endif()
 
 add_executable(packer src/packer.cc src/resource.cc src/resource_enc.cc src/util.cc)
 target_link_libraries(packer zlibstatic)

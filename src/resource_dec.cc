@@ -5,10 +5,11 @@
 
 std::vector<char> decompress_data(const std::vector<char>& compr_data,
                                   uint32_t raw_size) {
-    size_t _raw_size = raw_size;
+    uLong _raw_size = raw_size;
     std::vector<char> raw_data(raw_size);
     if (uncompress((uint8_t*)raw_data.data(), &_raw_size,
-                   (uint8_t*)compr_data.data(), compr_data.size()) != Z_OK) {
+                   (uint8_t*)compr_data.data(),
+                   (uLong)compr_data.size()) != Z_OK) {
         panic("failed to decompress data");
     }
     if (_raw_size != raw_size) {

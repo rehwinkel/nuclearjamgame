@@ -8,7 +8,7 @@ Component::~Component() {}
 Entity::Entity(Game& game, std::weak_ptr<Entity> parent, float x, float y,
                float rotation, float size_x, float size_y)
     : game(game),
-      parent{},
+      parent(parent),
       x(x),
       y(y),
       rotation(rotation),
@@ -80,12 +80,12 @@ bool Game::is_button_down(int button) {
     if (button >= GLFW_KEY_LAST || button < 0) panic("invalid button");
     return this->_mb_states[button];
 }
-float Game::get_mouse_x() { return this->_mouse_x; }
+double Game::get_mouse_x() { return this->_mouse_x; }
 
-float Game::get_mouse_y() { return this->_mouse_y; }
+double Game::get_mouse_y() { return this->_mouse_y; }
 
-float Game::get_scroll_x() { return this->_scroll_x; }
+double Game::get_scroll_x() { return this->_scroll_x; }
 
-float Game::get_scroll_y() { return this->_scroll_y; }
+double Game::get_scroll_y() { return this->_scroll_y; }
 
 Renderer& Game::renderer() { return this->m_renderer; }
