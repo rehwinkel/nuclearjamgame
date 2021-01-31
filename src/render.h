@@ -7,6 +7,7 @@ enum Uniform {
     UV,
     PROJ_MAT,
     MODEL_MAT,
+    COLOR_MUL,
     MAX_ELEMENT,
 };
 
@@ -24,6 +25,8 @@ class Renderer {
     void pre_render();
     void post_render();
     bool keep_open();
+    void set_color(float r, float g, float b);
+    void set_color(float r, float g, float b, float a);
     float &camera_x();
     float &camera_y();
     float &camera_scale();

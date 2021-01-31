@@ -8,7 +8,7 @@
 class Entity;
 class Game;
 
-class Component {
+class Component : public std::enable_shared_from_this<Component> {
    protected:
     Game& game;
     std::weak_ptr<Entity> entity;
@@ -35,6 +35,7 @@ class Game {
     template <class T, class... Args>
     std::shared_ptr<T> add_entity(Args... v) {
         std::shared_ptr<T> entity = std::make_shared<T>(*this, v...);
+        entity->init();
         entities.emplace_back(std::weak_ptr<T>(entity));
         return entity;
     }
@@ -63,17 +64,20 @@ class Entity : public std::enable_shared_from_this<Entity> {
            float rotation, float size_x, float size_y);
     Entity(Game& game, std::weak_ptr<Entity> parent);
     Entity(Game& game);
+    virtual void init() = 0;
     virtual ~Entity();
     template <class T, class... Args>
     void add_component(Args... v) {
+        std::shared_ptr<Entity> myself = shared_from_this();
         std::unique_ptr<T> comp = std::make_unique<T>(
-            this->game, std::weak_ptr<Entity>(shared_from_this()), v...);
+            this->game, std::weak_ptr<Entity>(myself), v...);
         this->components.emplace_back(std::move(comp));
     }
     template <class T, class... Args>
     std::shared_ptr<T> add_child(Args... v) {
         std::shared_ptr<T> entity = std::make_shared<T>(
             this->game, std::weak_ptr<Entity>(shared_from_this()), v...);
+        entity->init();
         this->game.get_entities().emplace_back(std::weak_ptr<T>(entity));
         this->children.push_back(entity);
         return entity;

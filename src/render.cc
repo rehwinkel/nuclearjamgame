@@ -35,6 +35,7 @@ out vec4 color;
 uniform sampler2D albedo;
 
 uniform vec4 uv_mapping;
+uniform vec4 color_mult;
 
 float map(float value, float min1, float max1, float min2, float max2) {
     float perc = (value - min1) / (max1 - min1);
@@ -48,7 +49,7 @@ void main(void) {
     final_uv = vec2(final_uv.x, final_uv.y);
     vec4 texture_color = texture2D(albedo, final_uv);
     if (texture_color.w == 0) discard;
-    color = texture_color;
+    color = color_mult * texture_color;
 }
 
 )"""";
@@ -136,10 +137,13 @@ Renderer::Renderer(Window window, uint16_t width, uint16_t height,
     this->uniforms[Uniform::PROJ_MAT] =
         glGetUniformLocation(program, "projection");
     this->uniforms[Uniform::MODEL_MAT] = glGetUniformLocation(program, "model");
+    this->uniforms[Uniform::COLOR_MUL] =
+        glGetUniformLocation(program, "color_mult");
     float ar = this->m_window.width() / this->m_window.height();
     glm::mat4 orthographic = glm::ortho(-ar, +ar, -1.0f, 1.0f, 0.0f, 1000.0f);
     glUniformMatrix4fv(this->uniforms[Uniform::PROJ_MAT], 1, false,
                        glm::value_ptr(orthographic));
+    this->set_color(1.0, 1.0, 1.0);
 }
 
 float& Renderer::camera_x() { return this->m_camera_x; }
@@ -176,9 +180,17 @@ void Renderer::draw_sprite(AtlasTexture tex, float x, float y, uint32_t z_level,
     float y_scale = (float)tex.height / (float)ppu_y * 0.5f;
     model_mat = glm::scale(model_mat, glm::vec3(x_scale, y_scale, 1.0f));
     glUniformMatrix4fv(model, 1, false, glm::value_ptr(model_mat));
+    // this->set_color(1.0, 1.0, 1.0, 1.0);
     glDrawArrays(GL_TRIANGLES, 0, 6);
 }
 
 bool Renderer::keep_open() { return this->m_window.keep_open(); }
 
 Window& Renderer::get_window() { return this->m_window; }
+
+void Renderer::set_color(float r, float g, float b) {
+    this->set_color(r, g, b, 1.0);
+}
+void Renderer::set_color(float r, float g, float b, float a) {
+    glUniform4f(this->uniforms[Uniform::COLOR_MUL], r, g, b, a);
+}

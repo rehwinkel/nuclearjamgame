@@ -8,6 +8,12 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 
+AtlasTexture::AtlasTexture() : AtlasTexture(0, 0, 0, 0) {}
+
+AtlasTexture::AtlasTexture(uint16_t x, uint16_t y, uint16_t width,
+                           uint16_t height)
+    : x(x), y(y), width(width), height(height) {}
+
 ResourceBuilder::ResourceBuilder() {}
 
 uint32_t ResourceBuilder::add_texture(const char* path) {

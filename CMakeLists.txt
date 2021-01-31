@@ -13,7 +13,7 @@ add_subdirectory(vendor/zlib)
 add_subdirectory(vendor/glm)
 add_library(glad STATIC vendor/glad/src/glad.c)
 
-add_library(game2d src/core.cc src/render.cc src/window.cc src/util.cc src/resource.cc src/resource_dec.cc)
+add_library(game2d src/core.cc src/render.cc src/window.cc src/util.cc src/resource.cc src/resource_dec.cc src/lib.cc)
 target_link_libraries(game2d glad glfw libsoundio_static zlibstatic glm_static)
 if (MSVC)
     target_compile_options(game2d PRIVATE /W4)
