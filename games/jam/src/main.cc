@@ -34,15 +34,11 @@ int main() {
     Atlas atlas = res.get_atlas();
     Game game(Renderer(Window(1280, 720, "Window"), atlas.width, atlas.height,
                        atlas.data.data()));
-    AtlasTexture red = res.get_texture(0);
-    AtlasTexture green = res.get_texture(1);
+    AtlasTexture red = res.get_texture(7);
 
     auto ptr2 =
         game.add_entity<Entity>(std::weak_ptr<Entity>{}, 0.5, 0.5, 0, 1, 1);
-    ptr2->add_component<SpriteComponent>(green, 1);
-
-    auto ptr = game.add_entity<Entity>();
-    ptr->add_component<SpriteComponent>(red, 2);
+    ptr2->add_component<SpriteComponent>(red, 1);
 
     game.renderer().camera_scale() = 8;
     game.renderer().camera_x() = 0;

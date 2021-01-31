@@ -151,25 +151,28 @@ Resource ResourceBuilder::build() {
             AtlasTexture{(uint16_t)result_node->x, (uint16_t)result_node->y,
                          (uint16_t)tex.width, (uint16_t)tex.height});
     }
-    std::vector<AtlasTexture> result;
-    for (const uint32_t& i : indices) {
-        AtlasTexture& res = unsorted_result[i];
-        result.push_back(res);
+
+    std::vector<AtlasTexture> result(unsorted_result.size());
+    for (uint32_t i = 0; i < result.size(); ++i) {
+        result[indices[i]] = unsorted_result[i];
     }
+
     std::vector<char> atlas_data;
     uint32_t atlas_width = root->w;
     uint32_t atlas_height = root->h;
     uint32_t atlas_px_width = root->w * 4;
-    atlas_data.resize(atlas_width * atlas_height * 4);
-    for (size_t i = 0; i < result.size(); i++) {
-        const AtlasTexture& pos = result[i];
+    atlas_data.resize(atlas_height * atlas_px_width);
+    for (size_t c = 0; c < unsorted_result.size(); ++c) {
+        const uint32_t& i = indices[c];
+        const AtlasTexture& pos = unsorted_result[c];
         const std::vector<char>& data = this->textures[i].data;
         const uint32_t& width = this->textures[i].width;
         const uint32_t& height = this->textures[i].height;
         for (uint32_t row = 0; row < height; row++) {
-            char* dest = atlas_data.data() +
-                         ((row + pos.y) * atlas_px_width + pos.x * 4);
-            const char* src = data.data() + (row * width * 4);
+            size_t src_offset = row * width * 4;
+            size_t dest_offset = (row + pos.y) * atlas_px_width + (pos.x * 4);
+            const char* src = data.data() + src_offset;
+            char* dest = atlas_data.data() + dest_offset;
             std::memcpy(dest, src, width * 4);
         }
     }
