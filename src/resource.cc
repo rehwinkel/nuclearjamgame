@@ -69,8 +69,10 @@ struct Node {
 
     Node* split_node(uint32_t width, uint32_t height) {
         this->used = true;
-        this->down = std::make_unique<Node>(x, y + height, w, h - height);
-        this->right = std::make_unique<Node>(x + width, y, w - width, h);
+        this->down = std::make_unique<Node>(this->x, this->y + height, this->w,
+                                            this->h - height);
+        this->right = std::make_unique<Node>(this->x + width, this->y,
+                                             this->w - width, height);
         return this;
     }
 

@@ -4,6 +4,9 @@
 #include <fstream>
 #include <iostream>
 
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#include <stb_image_write.h>
+
 int main(int argc, char const* argv[]) {
     if (argc < 3) {
         std::cout << "usage: " << argv[0] << " NAME FILE+" << std::endl;
@@ -26,6 +29,8 @@ int main(int argc, char const* argv[]) {
     }
 
     Resource r = builder.build();
+    stbi_write_png((out_name + ".png").c_str(), r.get_atlas().width,
+                   r.get_atlas().height, 4, r.get_atlas().data.data(), 0);
     std::vector<char> data = r.to_buffer();
     std::ofstream c_file(out_name + ".c");
 
