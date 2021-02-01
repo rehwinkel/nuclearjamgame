@@ -6,71 +6,6 @@
 
 #include "render.h"
 
-const char* vert_source = R""""(
-
-#version 130
-
-in vec3 position;
-
-out vec2 uv;
-
-uniform mat4 projection;
-uniform mat4 model;
-
-void main(void) {
-    gl_Position = projection * model * vec4(position, 1.0);
-    uv = (position.xy + 1.0) / 2.0;
-}
-
-)"""";
-
-const char* frag_source = R""""(
-
-#version 130
-
-in vec2 uv;
-
-out vec4 color;
-
-uniform sampler2D albedo;
-
-uniform vec4 uv_mapping;
-uniform vec4 color_mult;
-
-float map(float value, float min1, float max1, float min2, float max2) {
-    float perc = (value - min1) / (max1 - min1);
-    return perc * (max2 - min2) + min2;
-}
-
-void main(void) {
-    float u = map(uv.x, 0, 1, uv_mapping.x, uv_mapping.z);
-    float v = map(uv.y, 1, 0, uv_mapping.y, uv_mapping.w);
-    vec2 final_uv = vec2(u, v);
-    final_uv = vec2(final_uv.x, final_uv.y);
-    vec4 texture_color = texture2D(albedo, final_uv);
-    if (texture_color.w == 0) discard;
-    color = color_mult * texture_color;
-}
-
-)"""";
-
-void check_shader(GLuint shader) {
-    GLint compile_result = GL_FALSE;
-    int log_length;
-    glGetShaderiv(shader, GL_COMPILE_STATUS, &compile_result);
-    glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &log_length);
-    if (log_length > 0) {
-        std::vector<char> message(log_length + 1);
-        glGetShaderInfoLog(shader, log_length, nullptr, message.data());
-        std::string msg("failed to compile shader: ");
-        msg += message.data();
-        panic(msg.c_str());
-    }
-    if (!compile_result) {
-        panic("failed to compile shader");
-    }
-}
-
 Renderer::Renderer(Window window, uint16_t width, uint16_t height,
                    const char* data)
     : m_window(window),
@@ -78,7 +13,10 @@ Renderer::Renderer(Window window, uint16_t width, uint16_t height,
       m_atlas_height(height),
       m_camera_x(0),
       m_camera_y(0),
-      m_camera_scale(1) {
+      m_camera_scale(1),
+      m_world_shader() {
+    this->m_world_shader.load_uniforms();
+
     GLuint atlas_tex;
     glGenTextures(1, &atlas_tex);
     glBindTexture(GL_TEXTURE_2D, atlas_tex);
@@ -116,34 +54,16 @@ Renderer::Renderer(Window window, uint16_t width, uint16_t height,
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    GLuint frag_shader = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(frag_shader, 1, &frag_source, nullptr);
-    glCompileShader(frag_shader);
-    check_shader(frag_shader);
-
-    GLuint vert_shader = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vert_shader, 1, &vert_source, nullptr);
-    glCompileShader(vert_shader);
-    check_shader(vert_shader);
-
-    GLuint program = glCreateProgram();
-    glAttachShader(program, vert_shader);
-    glAttachShader(program, frag_shader);
-    glLinkProgram(program);
-    glUseProgram(program);
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, this->atlas_texture);
-    this->uniforms[Uniform::UV] = glGetUniformLocation(program, "uv_mapping");
-    this->uniforms[Uniform::PROJ_MAT] =
-        glGetUniformLocation(program, "projection");
-    this->uniforms[Uniform::MODEL_MAT] = glGetUniformLocation(program, "model");
-    this->uniforms[Uniform::COLOR_MUL] =
-        glGetUniformLocation(program, "color_mult");
+    this->m_world_shader.start();
+
     float ar = this->m_window.width() / this->m_window.height();
     glm::mat4 orthographic = glm::ortho(-ar, +ar, -1.0f, 1.0f, 0.0f, 1000.0f);
-    glUniformMatrix4fv(this->uniforms[Uniform::PROJ_MAT], 1, false,
-                       glm::value_ptr(orthographic));
+    glUniformMatrix4fv(this->m_world_shader.get_uni(WorldUniform::PROJ_MAT), 1,
+                       false, glm::value_ptr(orthographic));
     this->set_color(1.0, 1.0, 1.0);
+    this->m_world_shader.stop();
 }
 
 float& Renderer::camera_x() { return this->m_camera_x; }
@@ -162,8 +82,8 @@ void Renderer::post_render() { this->m_window.refresh(); }
 void Renderer::draw_sprite(AtlasTexture tex, float x, float y, uint32_t z_level,
                            float rotation, float ppu_x, float ppu_y) {
     if (z_level < 1 || z_level > 999) panic("invalid z level for sprite");
-    uint32_t uv_mapping = this->uniforms[Uniform::UV];
-    uint32_t model = this->uniforms[Uniform::MODEL_MAT];
+    uint32_t uv_mapping = this->m_world_shader.get_uni(WorldUniform::UV);
+    uint32_t model = this->m_world_shader.get_uni(WorldUniform::MODEL_MAT);
     glUniform4f(uv_mapping, (float)tex.x / (float)this->m_atlas_width,
                 (float)tex.y / (float)this->m_atlas_height,
                 (float)(tex.x + tex.width) / (float)this->m_atlas_width,
@@ -180,7 +100,7 @@ void Renderer::draw_sprite(AtlasTexture tex, float x, float y, uint32_t z_level,
     float y_scale = (float)tex.height / (float)ppu_y * 0.5f;
     model_mat = glm::scale(model_mat, glm::vec3(x_scale, y_scale, 1.0f));
     glUniformMatrix4fv(model, 1, false, glm::value_ptr(model_mat));
-    // this->set_color(1.0, 1.0, 1.0, 1.0);
+    this->set_color(1.0, 1.0, 1.0, 1.0);
     glDrawArrays(GL_TRIANGLES, 0, 6);
 }
 
@@ -191,6 +111,10 @@ Window& Renderer::get_window() { return this->m_window; }
 void Renderer::set_color(float r, float g, float b) {
     this->set_color(r, g, b, 1.0);
 }
+
 void Renderer::set_color(float r, float g, float b, float a) {
-    glUniform4f(this->uniforms[Uniform::COLOR_MUL], r, g, b, a);
+    glUniform4f(this->m_world_shader.get_uni(WorldUniform::COLOR_MUL), r, g, b,
+                a);
 }
+
+WorldShader& Renderer::world_shader() { return this->m_world_shader; }

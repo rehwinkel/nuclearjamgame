@@ -17,7 +17,7 @@ class Component : public std::enable_shared_from_this<Component> {
     Component(Game& game, std::weak_ptr<Entity> entity);
     virtual ~Component();
     virtual void update(double delta) = 0;
-    virtual void render(Renderer& renderer) = 0;
+    virtual void render(Renderer& renderer, uint8_t pass) = 0;
 };
 
 class Entity;
@@ -83,5 +83,5 @@ class Entity : public std::enable_shared_from_this<Entity> {
         return entity;
     }
     void update(double delta);
-    void render(Renderer& renderer);
+    void render(Renderer& renderer, uint8_t pass);
 };

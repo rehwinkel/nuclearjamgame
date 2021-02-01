@@ -45,7 +45,7 @@ class GridBackgroundComponent : public Component {
         : Component(game, entity), texture(tex) {}
     virtual ~GridBackgroundComponent() {}
     virtual void update(double delta) {}
-    virtual void render(Renderer& renderer) {
+    virtual void render(Renderer& renderer, uint8_t pass) {
         float cam_x = this->game.renderer().camera_x();
         float cam_y = this->game.renderer().camera_y();
         int16_t y_scale = (int16_t)this->game.renderer().camera_scale();
@@ -103,7 +103,7 @@ class TopCameraComponent : public Component {
 
         last_scroll_pos = this->game.get_scroll_y();
     }
-    virtual void render(Renderer& renderer) {}
+    virtual void render(Renderer& renderer, uint8_t pass) {}
 };
 
 class MousePickComponent : public Component {
@@ -115,7 +115,7 @@ class MousePickComponent : public Component {
         : Component(game, entity), texture(selector) {}
     virtual ~MousePickComponent() {}
     virtual void update(double delta) {}
-    virtual void render(Renderer& renderer) {
+    virtual void render(Renderer& renderer, uint8_t pass) {
         float aspect_ratio = this->game.renderer().get_window().width() /
                              this->game.renderer().get_window().height();
         float x = this->game.get_mouse_x() /

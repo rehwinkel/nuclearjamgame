@@ -30,9 +30,9 @@ void Entity::update(double delta) {
     }
 }
 
-void Entity::render(Renderer& renderer) {
+void Entity::render(Renderer& renderer, uint8_t pass) {
     for (auto& component : this->components) {
-        component->render(renderer);
+        component->render(renderer, pass);
     }
 }
 
@@ -58,12 +58,16 @@ void Game::run() {
             }
         }
         this->m_renderer.pre_render();
+
+        this->m_renderer.world_shader().start();
         for (std::weak_ptr<Entity>& entity_weak : this->entities) {
             if (!entity_weak.expired()) {
                 std::shared_ptr<Entity> entity = entity_weak.lock();
-                entity->render(this->m_renderer);
+                entity->render(this->m_renderer, 0);
             }
         }
+        this->m_renderer.world_shader().stop();
+
         last_time = glfwGetTime();
         this->m_renderer.post_render();
     }

@@ -1,22 +1,16 @@
 #pragma once
 
 #include "window.h"
+#include "shader.h"
 #include "resource.h"
-
-enum Uniform {
-    UV,
-    PROJ_MAT,
-    MODEL_MAT,
-    COLOR_MUL,
-    MAX_ELEMENT,
-};
 
 class Renderer {
     Window m_window;
+    uint8_t m_passes;
     uint16_t m_atlas_width, m_atlas_height;
     uint32_t atlas_texture;
-    uint32_t uniforms[Uniform::MAX_ELEMENT];
     float m_camera_x, m_camera_y, m_camera_scale;
+    WorldShader m_world_shader;
 
    public:
     Renderer(Window window, uint16_t width, uint16_t height, const char *data);
@@ -31,4 +25,5 @@ class Renderer {
     float &camera_y();
     float &camera_scale();
     Window &get_window();
+    WorldShader &world_shader();
 };

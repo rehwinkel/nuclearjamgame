@@ -14,7 +14,7 @@ class SpriteComponent : public Component {
                     AtlasTexture texture, uint32_t level);
     virtual ~SpriteComponent();
     virtual void update(double delta);
-    virtual void render(Renderer& renderer);
+    virtual void render(Renderer& renderer, uint8_t pass);
 };
 
 class ColorSpriteComponent : public SpriteComponent {
@@ -28,5 +28,5 @@ class ColorSpriteComponent : public SpriteComponent {
                          float b);
     virtual ~ColorSpriteComponent();
     virtual void update(double delta);
-    virtual void render(Renderer& renderer);
+    virtual void render(Renderer& renderer, uint8_t pass);
 };
