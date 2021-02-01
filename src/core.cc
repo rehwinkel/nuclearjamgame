@@ -20,6 +20,8 @@ Entity::Entity(Game& game, std::weak_ptr<Entity> parent)
 
 Entity::Entity(Game& game) : Entity(game, std::weak_ptr<Entity>{}) {}
 
+void Entity::init() {}
+
 Entity::~Entity() {}
 
 void Entity::update(double delta) {

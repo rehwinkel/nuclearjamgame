@@ -64,7 +64,7 @@ class Entity : public std::enable_shared_from_this<Entity> {
            float rotation, float size_x, float size_y);
     Entity(Game& game, std::weak_ptr<Entity> parent);
     Entity(Game& game);
-    virtual void init() = 0;
+    virtual void init();
     virtual ~Entity();
     template <class T, class... Args>
     void add_component(Args... v) {
