@@ -11,8 +11,8 @@ void SpriteComponent::update(double delta) { (void)delta; }
 void SpriteComponent::render(Renderer& renderer, uint8_t pass) {
     (void)pass;
     std::shared_ptr<Entity> this_entity = this->entity.lock();
-    renderer.draw_sprite(this->texture, this_entity->x, this_entity->y, level,
-                         this_entity->rotation,
+    renderer.draw_sprite(this->texture, Point2f{this_entity->x, this_entity->y},
+                         level, this_entity->rotation,
                          this_entity->size_x * PIXELS_PER_UNIT,
                          this_entity->size_y * PIXELS_PER_UNIT);
 }

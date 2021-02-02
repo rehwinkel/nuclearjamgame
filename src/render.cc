@@ -4,7 +4,7 @@
 #include <gtc/type_ptr.hpp>
 #include <gtc/matrix_transform.hpp>
 
-#include "render.h"
+#include "core.h"
 
 Renderer::Renderer(Window window, uint16_t width, uint16_t height,
                    const char* data)
@@ -14,8 +14,10 @@ Renderer::Renderer(Window window, uint16_t width, uint16_t height,
       m_camera_x(0),
       m_camera_y(0),
       m_camera_scale(1),
-      m_world_shader() {
+      m_world_shader(),
+      m_gui_shader() {
     this->m_world_shader.load_uniforms();
+    this->m_gui_shader.load_uniforms();
 
     GLuint atlas_tex;
     glGenTextures(1, &atlas_tex);
@@ -60,8 +62,8 @@ Renderer::Renderer(Window window, uint16_t width, uint16_t height,
 
     float ar = this->m_window.width() / this->m_window.height();
     glm::mat4 orthographic = glm::ortho(-ar, +ar, -1.0f, 1.0f, 0.0f, 1000.0f);
-    glUniformMatrix4fv(this->m_world_shader.get_uni(WorldUniform::PROJ_MAT), 1,
-                       false, glm::value_ptr(orthographic));
+    glUniformMatrix4fv(this->m_world_shader.get_uni(WorldUniform::W_PROJ_MAT),
+                       1, false, glm::value_ptr(orthographic));
     this->set_color(1.0, 1.0, 1.0);
     this->m_world_shader.stop();
 }
@@ -79,11 +81,11 @@ void Renderer::pre_render() {
 void Renderer::post_render() { this->m_window.refresh(); }
 
 // ppu = pixels per unit
-void Renderer::draw_sprite(AtlasTexture tex, float x, float y, uint32_t z_level,
+void Renderer::draw_sprite(AtlasTexture tex, Point2f pos, uint32_t z_level,
                            float rotation, float ppu_x, float ppu_y) {
     if (z_level < 1 || z_level > 999) panic("invalid z level for sprite");
-    uint32_t uv_mapping = this->m_world_shader.get_uni(WorldUniform::UV);
-    uint32_t model = this->m_world_shader.get_uni(WorldUniform::MODEL_MAT);
+    uint32_t uv_mapping = this->m_world_shader.get_uni(WorldUniform::W_UV);
+    uint32_t model = this->m_world_shader.get_uni(WorldUniform::W_MODEL_MAT);
     glUniform4f(uv_mapping, (float)tex.x / (float)this->m_atlas_width,
                 (float)tex.y / (float)this->m_atlas_height,
                 (float)(tex.x + tex.width) / (float)this->m_atlas_width,
@@ -92,7 +94,7 @@ void Renderer::draw_sprite(AtlasTexture tex, float x, float y, uint32_t z_level,
     glm::mat4 model_mat(1.0f);
     model_mat = glm::scale(model_mat, glm::vec3(2.0f / this->m_camera_scale));
     model_mat = glm::translate(
-        model_mat, glm::vec3(x - this->m_camera_x, y - this->m_camera_y,
+        model_mat, glm::vec3(pos.x - this->m_camera_x, pos.y - this->m_camera_y,
                              (float)z_level - 1000.0f));
     model_mat = glm::rotate(model_mat, glm::radians(-rotation),
                             glm::vec3(0.0f, 0.0f, 1.0f));
@@ -101,6 +103,31 @@ void Renderer::draw_sprite(AtlasTexture tex, float x, float y, uint32_t z_level,
     model_mat = glm::scale(model_mat, glm::vec3(x_scale, y_scale, 1.0f));
     glUniformMatrix4fv(model, 1, false, glm::value_ptr(model_mat));
     this->set_color(1.0, 1.0, 1.0, 1.0);
+    glDrawArrays(GL_TRIANGLES, 0, 6);
+}
+
+// ppu = pixels per unit
+void Renderer::draw_gui_texture(AtlasTexture tex, Point2i pos1, Point2i pos2) {
+    uint32_t uv_mapping = this->m_gui_shader.get_uni(GuiUniform::G_UV);
+    uint32_t model = this->m_gui_shader.get_uni(GuiUniform::G_MODEL_MAT);
+    glUniform4f(uv_mapping, (float)tex.x / (float)this->m_atlas_width,
+                (float)tex.y / (float)this->m_atlas_height,
+                (float)(tex.x + tex.width) / (float)this->m_atlas_width,
+                (float)(tex.y + tex.height) / (float)this->m_atlas_height);
+
+    glm::mat4 model_mat(1.0f);
+    float p1x = (float)pos1.x / this->m_window.width();
+    float p1y = (float)pos1.y / this->m_window.height();
+    float p2x = (float)pos2.x / this->m_window.width();
+    float p2y = (float)pos2.y / this->m_window.height();
+    float scale_x = p2x - p1x;
+    float scale_y = p2y - p1y;
+    model_mat = glm::translate(model_mat, glm::vec3(-1, +1, 0.0f));
+    model_mat = glm::scale(model_mat, glm::vec3(scale_x, scale_y, 1.0f));
+    model_mat = glm::translate(model_mat, glm::vec3(1, -1, 0));
+    model_mat = glm::translate(
+        model_mat, glm::vec3(p1x / scale_x * 2, -p1y / scale_y * 2, 0));
+    glUniformMatrix4fv(model, 1, false, glm::value_ptr(model_mat));
     glDrawArrays(GL_TRIANGLES, 0, 6);
 }
 
@@ -113,8 +140,40 @@ void Renderer::set_color(float r, float g, float b) {
 }
 
 void Renderer::set_color(float r, float g, float b, float a) {
-    glUniform4f(this->m_world_shader.get_uni(WorldUniform::COLOR_MUL), r, g, b,
-                a);
+    glUniform4f(this->m_world_shader.get_uni(WorldUniform::W_COLOR_MUL), r, g,
+                b, a);
 }
 
 WorldShader& Renderer::world_shader() { return this->m_world_shader; }
+
+GuiShader& Renderer::gui_shader() { return this->m_gui_shader; }
+
+void Renderer::update(double& last_time,
+                      std::vector<std::weak_ptr<Entity>>& entities) {
+    this->pre_render();
+
+    glEnable(GL_DEPTH_TEST);
+
+    this->m_world_shader.start();
+    for (std::weak_ptr<Entity>& entity_weak : entities) {
+        if (!entity_weak.expired()) {
+            std::shared_ptr<Entity> entity = entity_weak.lock();
+            entity->render(*this, 0);
+        }
+    }
+    this->m_world_shader.stop();
+
+    glDisable(GL_DEPTH_TEST);
+
+    this->m_gui_shader.start();
+    for (std::weak_ptr<Entity>& entity_weak : entities) {
+        if (!entity_weak.expired()) {
+            std::shared_ptr<Entity> entity = entity_weak.lock();
+            entity->render(*this, 1);
+        }
+    }
+    this->gui_shader().stop();
+
+    last_time = glfwGetTime();
+    this->post_render();
+}

@@ -20,8 +20,6 @@ class Component : public std::enable_shared_from_this<Component> {
     virtual void render(Renderer& renderer, uint8_t pass) = 0;
 };
 
-class Entity;
-
 class Game {
     Renderer m_renderer;
     std::vector<std::weak_ptr<Entity>> entities;

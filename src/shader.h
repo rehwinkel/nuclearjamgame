@@ -24,9 +24,22 @@ class WorldShader : public Shader {
 };
 
 enum WorldUniform {
-    UV,
-    PROJ_MAT,
-    MODEL_MAT,
-    COLOR_MUL,
-    MAX_ELEMENT,
+    W_UV,
+    W_PROJ_MAT,
+    W_MODEL_MAT,
+    W_COLOR_MUL,
+    W_MAX_ELEMENT,
+};
+
+class GuiShader : public Shader {
+   public:
+    GuiShader();
+    virtual void load_uniforms();
+};
+
+enum GuiUniform {
+    G_UV,
+    G_MODEL_MAT,
+    G_COLOR_MUL,
+    G_MAX_ELEMENT,
 };

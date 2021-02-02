@@ -4,6 +4,7 @@
 #include <glad/glad.h>
 
 #include "world_shader.h"
+#include "gui_shader.h"
 
 void check_shader(GLuint shader) {
     GLint compile_result = GL_FALSE;
@@ -51,15 +52,28 @@ void Shader::load_uniforms() {}
 
 WorldShader::WorldShader()
     : Shader(world_shader_vert_source, world_shader_frag_source,
-             WorldUniform::MAX_ELEMENT) {}
+             WorldUniform::W_MAX_ELEMENT) {}
 
 void WorldShader::load_uniforms() {
-    this->uniforms[WorldUniform::UV] =
+    this->uniforms[WorldUniform::W_UV] =
         glGetUniformLocation(program, "uv_mapping");
-    this->uniforms[WorldUniform::PROJ_MAT] =
+    this->uniforms[WorldUniform::W_PROJ_MAT] =
         glGetUniformLocation(program, "projection");
-    this->uniforms[WorldUniform::MODEL_MAT] =
+    this->uniforms[WorldUniform::W_MODEL_MAT] =
         glGetUniformLocation(program, "model");
-    this->uniforms[WorldUniform::COLOR_MUL] =
+    this->uniforms[WorldUniform::W_COLOR_MUL] =
+        glGetUniformLocation(program, "color_mult");
+}
+
+GuiShader::GuiShader()
+    : Shader(gui_shader_vert_source, gui_shader_frag_source,
+             GuiUniform::G_MAX_ELEMENT) {}
+
+void GuiShader::load_uniforms() {
+    this->uniforms[GuiUniform::G_UV] =
+        glGetUniformLocation(program, "uv_mapping");
+    this->uniforms[GuiUniform::G_MODEL_MAT] =
+        glGetUniformLocation(program, "model");
+    this->uniforms[GuiUniform::G_COLOR_MUL] =
         glGetUniformLocation(program, "color_mult");
 }

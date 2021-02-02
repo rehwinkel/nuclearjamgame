@@ -1,4 +1,4 @@
-const char* world_shader_vert_source = R""""(
+const char* gui_shader_vert_source = R""""(
 
 #version 130
 
@@ -6,17 +6,16 @@ in vec3 position;
 
 out vec2 uv;
 
-uniform mat4 projection;
 uniform mat4 model;
 
 void main(void) {
-    gl_Position = projection * model * vec4(position, 1.0);
+    gl_Position = model * vec4(position, 1.0);
     uv = (position.xy + 1.0) / 2.0;
 }
 
 )"""";
 
-const char* world_shader_frag_source = R""""(
+const char* gui_shader_frag_source = R""""(
 
 #version 130
 

@@ -59,7 +59,8 @@ class GridBackgroundComponent : public Component {
              y++) {
             for (int16_t x = -half_x_scale + cam_x; x <= half_x_scale + cam_x;
                  x++) {
-                renderer.draw_sprite(this->texture, x, y, 1, 0,
+                renderer.draw_sprite(this->texture, Point2f{(float)x, (float)y},
+                                     1, 0,
                                      PIXELS_PER_UNIT / GRID_CORRECTION_SCALE,
                                      PIXELS_PER_UNIT / GRID_CORRECTION_SCALE);
             }
@@ -116,6 +117,7 @@ class MousePickComponent : public Component {
     virtual ~MousePickComponent() {}
     virtual void update(double delta) {}
     virtual void render(Renderer& renderer, uint8_t pass) {
+        if (pass != 1) return;
         float aspect_ratio = this->game.renderer().get_window().width() /
                              this->game.renderer().get_window().height();
         float x = this->game.get_mouse_x() /
@@ -128,8 +130,12 @@ class MousePickComponent : public Component {
         y *= this->game.renderer().camera_scale() / 2;
         x += this->game.renderer().camera_x();
         y += this->game.renderer().camera_y();
-        renderer.draw_sprite(this->texture, std::round(x), std::round(y), 999,
-                             0, PIXELS_PER_UNIT, PIXELS_PER_UNIT);
+        /*
+        renderer.draw_gui_texture(
+            this->texture, Point2f{std::round(x), std::round(y)},
+            Point2f{std::round(x) + 1, std::round(y) + 1}, 999);*/
+        renderer.draw_gui_texture(this->texture, Point2i{100, 100},
+                                  Point2i{1180, 620});
     }
 };
 
