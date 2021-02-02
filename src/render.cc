@@ -128,6 +128,31 @@ void Renderer::draw_gui_texture(AtlasTexture tex, Point2i pos1, Point2i pos2) {
     model_mat = glm::translate(
         model_mat, glm::vec3(p1x / scale_x * 2, -p1y / scale_y * 2, 0));
     glUniformMatrix4fv(model, 1, false, glm::value_ptr(model_mat));
+    glUniform4f(this->m_gui_shader.get_uni(GuiUniform::G_COLOR_MUL), 0, 0, 0,
+                0);
+    glDrawArrays(GL_TRIANGLES, 0, 6);
+}
+
+// ppu = pixels per unit
+void Renderer::draw_gui_color(float r, float g, float b, float a, Point2i pos1,
+                              Point2i pos2) {
+    uint32_t model = this->m_gui_shader.get_uni(GuiUniform::G_MODEL_MAT);
+
+    glm::mat4 model_mat(1.0f);
+    float p1x = (float)pos1.x / this->m_window.width();
+    float p1y = (float)pos1.y / this->m_window.height();
+    float p2x = (float)pos2.x / this->m_window.width();
+    float p2y = (float)pos2.y / this->m_window.height();
+    float scale_x = p2x - p1x;
+    float scale_y = p2y - p1y;
+    model_mat = glm::translate(model_mat, glm::vec3(-1, +1, 0.0f));
+    model_mat = glm::scale(model_mat, glm::vec3(scale_x, scale_y, 1.0f));
+    model_mat = glm::translate(model_mat, glm::vec3(1, -1, 0));
+    model_mat = glm::translate(
+        model_mat, glm::vec3(p1x / scale_x * 2, -p1y / scale_y * 2, 0));
+    glUniformMatrix4fv(model, 1, false, glm::value_ptr(model_mat));
+    glUniform4f(this->m_gui_shader.get_uni(GuiUniform::G_COLOR_MUL), r, g, b,
+                a);
     glDrawArrays(GL_TRIANGLES, 0, 6);
 }
 

@@ -9,7 +9,7 @@ SpriteComponent::~SpriteComponent() {}
 void SpriteComponent::update(double delta) { (void)delta; }
 
 void SpriteComponent::render(Renderer& renderer, uint8_t pass) {
-    (void)pass;
+    if (pass != 0) return;
     std::shared_ptr<Entity> this_entity = this->entity.lock();
     renderer.draw_sprite(this->texture, Point2f{this_entity->x, this_entity->y},
                          level, this_entity->rotation,
@@ -31,6 +31,7 @@ ColorSpriteComponent::~ColorSpriteComponent() {}
 void ColorSpriteComponent::update(double delta) { (void)delta; }
 
 void ColorSpriteComponent::render(Renderer& renderer, uint8_t pass) {
+    if (pass != 0) return;
     renderer.set_color(this->red, this->green, this->blue);
     SpriteComponent::render(renderer, pass);
     renderer.set_color(1.0, 1.0, 1.0);
